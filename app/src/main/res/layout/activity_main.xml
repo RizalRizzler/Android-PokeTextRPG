@@ -8,83 +8,157 @@
     android:background="#F0F0F0"
     tools:context=".logic.MainActivity">
 
-    <!-- Player Status Section -->
-    <androidx.cardview.widget.CardView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="10dp"
-        android:elevation="4dp">
-
-        <TextView
-            android:id="@+id/txtPlayerStatus"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:padding="16dp"
-            android:text="Player HP: 100 | Enemy HP: 100"
-            android:textSize="18sp"
-            android:textStyle="bold"
-            android:textColor="#333333"
-            android:textAlignment="center"/>
-    </androidx.cardview.widget.CardView>
-
-    <!-- Game Log (Scrollable) -->
-    <!-- This takes up all available space (layout_weight=1) -->
-    <ScrollView
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1"
-        android:background="#FFFFFF"
-        android:padding="8dp"
-        android:fillViewport="true">
-
-        <TextView
-            android:id="@+id/txtGameLog"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Welcome to the Kotlin RPG!\nChoose an action below to start."
-            android:textSize="16sp"
-            android:textColor="#000000"
-            android:lineSpacingExtra="4dp"
-            android:fontFamily="monospace"/>
-    </ScrollView>
-
-    <!-- Action Buttons -->
     <LinearLayout
+        android:id="@+id/layoutSetup"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:layout_marginTop="10dp"
-        android:weightSum="3">
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:gravity="center"
+        android:visibility="visible">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Welcome to PokeTextRPG!"
+            android:textSize="24sp"
+            android:textStyle="bold"
+            android:layout_marginBottom="24dp"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Enter your Name:"
+            android:textSize="16sp"/>
+
+        <EditText
+            android:id="@+id/etPlayerName"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Player Name"
+            android:inputType="textPersonName"
+            android:layout_marginBottom="24dp"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Choose your Starter:"
+            android:textSize="16sp"
+            android:layout_marginBottom="8dp"/>
+
+        <RadioGroup
+            android:id="@+id/rgStarter"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_horizontal"
+            android:layout_marginBottom="24dp">
+
+            <RadioButton
+                android:id="@+id/rbTreecko"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Treecko (Grass)"
+                android:checked="true"/>
+            <RadioButton
+                android:id="@+id/rbTorchic"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Torchic (Fire)"/>
+            <RadioButton
+                android:id="@+id/rbMudkip"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Mudkip (Water)"/>
+        </RadioGroup>
 
         <Button
-            android:id="@+id/btnAttack"
-            android:layout_width="0dp"
+            android:id="@+id/btnStartGame"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="Attack"
-            android:layout_marginEnd="4dp"
-            android:backgroundTint="#E53935"
+            android:text="Start Adventure"
+            android:backgroundTint="#6200EE"
             android:textColor="#FFFFFF"/>
+    </LinearLayout>
 
-        <Button
-            android:id="@+id/btnHeal"
-            android:layout_width="0dp"
+    <LinearLayout
+        android:id="@+id/layoutGame"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:visibility="gone">
+
+        <androidx.cardview.widget.CardView
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginEnd="4dp"
-            android:layout_weight="1"
-            android:backgroundTint="#43A047"
-            android:text="Heal"
-            android:textColor="#FFFFFF" />
+            android:layout_marginBottom="10dp"
+            android:elevation="4dp">
 
-        <Button
-            android:id="@+id/btnRun"
-            android:layout_width="0dp"
+            <TextView
+                android:id="@+id/txtPlayerStatus"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:padding="16dp"
+                android:text="Player HP: 100 | Enemy HP: 100"
+                android:textSize="18sp"
+                android:textStyle="bold"
+                android:textColor="#333333"
+                android:textAlignment="center"/>
+        </androidx.cardview.widget.CardView>
+
+        <ScrollView
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:background="#FFFFFF"
+            android:padding="8dp"
+            android:fillViewport="true">
+
+            <TextView
+                android:id="@+id/txtGameLog"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text=""
+                android:textSize="16sp"
+                android:textColor="#000000"
+                android:lineSpacingExtra="4dp"
+                android:fontFamily="monospace"/>
+        </ScrollView>
+
+        <LinearLayout
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="Run"
-            android:backgroundTint="#FB8C00"
-            android:textColor="#FFFFFF"/>
+            android:orientation="horizontal"
+            android:layout_marginTop="10dp"
+            android:weightSum="3">
 
+            <Button
+                android:id="@+id/btnAttack"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Attack"
+                android:layout_marginEnd="4dp"
+                android:backgroundTint="#E53935"
+                android:textColor="#FFFFFF"/>
+
+            <Button
+                android:id="@+id/btnHeal"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="4dp"
+                android:layout_weight="1"
+                android:backgroundTint="#43A047"
+                android:text="Heal"
+                android:textColor="#FFFFFF" />
+
+            <Button
+                android:id="@+id/btnRun"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Run"
+                android:backgroundTint="#FB8C00"
+                android:textColor="#FFFFFF"/>
+        </LinearLayout>
     </LinearLayout>
 
 </LinearLayout>
