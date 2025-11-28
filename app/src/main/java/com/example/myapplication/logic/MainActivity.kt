@@ -51,7 +51,14 @@ class MainActivity : AppCompatActivity() {
             val battle = currentBattle ?: return@setOnClickListener
             // Use move 0 (Tackle/Scratch usually)
             val result = battle.playerFight(0)
-            updateUI(result.log, result.playerCurrentHp, result.enemyCurrentHp)
+            updateUI(
+                result.log,
+                result.playerCurrentHp,
+                result.enemyCurrentHp,
+                result.playerExp,
+                result.playerMaxExp,
+                result.playerLevel
+            )
             checkBattleEnd(result.status)
         }
 
@@ -70,10 +77,16 @@ class MainActivity : AppCompatActivity() {
                     break
                 }
             }
-
             if (itemIndex != -1) {
                 val result = battle.playerUseItem(itemIndex)
-                updateUI(result.log, result.playerCurrentHp, result.enemyCurrentHp)
+                updateUI(
+                    result.log,
+                    result.playerCurrentHp,
+                    result.enemyCurrentHp,
+                    result.playerExp,
+                    result.playerMaxExp,
+                    result.playerLevel
+                )
                 checkBattleEnd(result.status)
             } else {
                 Toast.makeText(this, "No healing items left!", Toast.LENGTH_SHORT).show()
@@ -83,9 +96,15 @@ class MainActivity : AppCompatActivity() {
         btnRun.setOnClickListener {
             val battle = currentBattle ?: return@setOnClickListener
             val result = battle.playerRun()
-            updateUI(result.log, result.playerCurrentHp, result.enemyCurrentHp)
-            checkBattleEnd(result.status)
-        }
+            updateUI(
+                result.log,
+                result.playerCurrentHp,
+                result.enemyCurrentHp,
+                result.playerExp,
+                result.playerMaxExp,
+                result.playerLevel
+            )
+            checkBattleEnd(result.status)        }
     }
 
     private fun startWildEncounter() {
@@ -94,37 +113,43 @@ class MainActivity : AppCompatActivity() {
 
         if (activePokemon == null) {
             appendLog("\nAll your Pokemon have fainted! You blacked out.")
-            // Heal party and restart battle
             player.party.forEach { it.heal(it.maxHP) }
             appendLog("Nurse Joy healed your party.")
             startWildEncounter()
             return
         }
 
-        // --- RANDOMIZED ENCOUNTER ---
-        // Using the helper function from Pokemon.kt
         val wildPokemon = createRandomWildPokemon()
-
-        // Optional: Scale wild pokemon to be near player level
-        val scaledLevel = (activePokemon.level - 1).coerceAtLeast(1)
-        wildPokemon.setLevel(scaledLevel)
+        // Scale enemy level
+        wildPokemon.setLevel(activePokemon.level.coerceAtLeast(1))
 
         currentBattle = BattleManager(player, activePokemon, wildPokemon)
 
         appendLog("\n--- NEW BATTLE ---")
         appendLog("A wild ${wildPokemon.name} appeared!")
-        updateStatus(activePokemon.currentHP, wildPokemon.currentHP)
-    }
 
-    private fun updateUI(log: String, playerHp: Int, enemyHp: Int) {
+        // --- UPDATED CALL ---
+        updateStatus(
+            activePokemon.currentHP,
+            wildPokemon.currentHP,
+            activePokemon.exp,
+            activePokemon.expToLevelUp,
+            activePokemon.level
+        )
+    }
+    private fun updateUI(log: String, playerHp: Int, enemyHp: Int, exp: Int, maxExp: Int, level: Int) {
         appendLog(log)
-        updateStatus(playerHp, enemyHp)
+        updateStatus(playerHp, enemyHp, exp, maxExp, level)
     }
-
-    private fun updateStatus(playerHp: Int, enemyHp: Int) {
-        txtPlayerStatus.text = "Player HP: $playerHp | Enemy HP: $enemyHp"
+    private fun updateStatus(playerHp: Int, enemyHp: Int, exp: Int, maxExp: Int, level: Int) {
+        val statusText = """
+            Player: Lvl $level ($playerHp HP)
+            EXP: $exp / $maxExp
+            -----------------------
+            Enemy: $enemyHp HP
+        """.trimIndent()
+        txtPlayerStatus.text = statusText
     }
-
     private fun appendLog(text: String) {
         val currentText = txtGameLog.text.toString()
         txtGameLog.text = "$currentText\n$text"

@@ -5,17 +5,13 @@ import kotlin.random.Random
 interface Item {
     val name: String
     val canBeUsedPostBattle: Boolean
-    // Returns a String message to be displayed by the Android UI (Toast or Text)
+    //returns string for toast/text
     fun use(target: Pokemon, inventory: Inventory, index: Int): String
 }
 
 class Inventory(private val size: Int = 10) {
     private val items: Array<Item?> = arrayOfNulls(size)
 
-    /**
-     * Tries to add an item.
-     * Returns a String message describing what happened (Success or Failure).
-     */
     fun addItem(item: Item): String {
         for (i in items.indices) {
             if (items[i] == null) {
@@ -44,7 +40,7 @@ class Inventory(private val size: Int = 10) {
         return items
     }
 
-    // NOTE: listItems() was removed because the Console cannot print in Android app.
+    //listItems() removed
 }
 
 class Potion(val healAmount: Int = 20) : Item {
@@ -63,7 +59,7 @@ class Potion(val healAmount: Int = 20) : Item {
     }
 }
 
-class SuperPotion(val healAmount: Int = 60) : Item { // Renamed to Capital S for standard convention
+class SuperPotion(val healAmount: Int = 60) : Item {
     override val name: String = "Super Potion (Heal $healAmount)"
     override val canBeUsedPostBattle: Boolean = true
 
@@ -86,17 +82,16 @@ class Pokeball : Item {
     override fun use(target: Pokemon, inventory: Inventory, index: Int): String {
         inventory.removeItem(index)
 
-        // Logic remains exactly the same as your original code
         val catchRate = (1.0 - (target.currentHP.toDouble() / target.maxHP)) * 0.7 + 0.3
 
         return if (Random.nextDouble() < catchRate) {
-            // Note: Actual logic to 'add to party' must be handled by the Battle Manager checking this string
             "Gotcha! ${target.name} was caught!"
         } else {
             "Oh no! ${target.name} broke free!"
         }
     }
 }
+
 
 class Revive : Item {
     override val name: String = "Revive"
