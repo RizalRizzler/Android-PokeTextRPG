@@ -1,5 +1,6 @@
 package com.example.myapplication.logic
 
+import android.content.Intent
 import android.os.Bundle
 import android.widget.Button
 import android.widget.TextView
@@ -7,9 +8,8 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.example.myapplication.R
 import com.example.myapplication.models.Potion
-import com.example.myapplication.models.Revive
 import com.example.myapplication.models.SuperPotion
-import com.example.myapplication.models.createPokemon
+import com.example.myapplication.models.createRandomWildPokemon
 
 class MainActivity : AppCompatActivity() {
 
@@ -25,27 +25,40 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
+        // Safety Check: If player is null (app crashed/restarted in background), go back to Setup
+        if (GameRepository.player == null) {
+            startActivity(Intent(this, SetupActivity::class.java))
+            finish()
+            return
+        }
+
         txtGameLog = findViewById(R.id.txtGameLog)
         txtPlayerStatus = findViewById(R.id.txtPlayerStatus)
         btnAttack = findViewById(R.id.btnAttack)
         btnHeal = findViewById(R.id.btnHeal)
         btnRun = findViewById(R.id.btnRun)
 
-        if (GameRepository.player == null) {
-            GameRepository.initializeGame("Ash Ketchum")
-            val starter = createPokemon("TREECKO")
-            if (starter != null) {
-                GameRepository.player?.addPokemon(starter)
-                appendLog("You chose Treecko!")
-            }
-        }
+        // Log welcome message
+        val playerName = GameRepository.player?.name ?: "Trainer"
+        val starterName = GameRepository.player?.party?.firstOrNull()?.name ?: "Pokemon"
+        appendLog("Welcome, $playerName! Go get 'em, $starterName!")
 
+        // Start the first random battle
         startWildEncounter()
 
+        // --- BUTTON LISTENERS ---
         btnAttack.setOnClickListener {
             val battle = currentBattle ?: return@setOnClickListener
-            val result = battle.playerFight(0) // Uses first move (Tackle)
-            updateUI(result.log, result.playerCurrentHp, result.enemyCurrentHp)
+            // Use move 0 (Tackle/Scratch usually)
+            val result = battle.playerFight(0)
+            updateUI(
+                result.log,
+                result.playerCurrentHp,
+                result.enemyCurrentHp,
+                result.playerExp,
+                result.playerMaxExp,
+                result.playerLevel
+            )
             checkBattleEnd(result.status)
         }
 
@@ -53,7 +66,7 @@ class MainActivity : AppCompatActivity() {
             val battle = currentBattle ?: return@setOnClickListener
             val player = GameRepository.player ?: return@setOnClickListener
 
-            // FIX: Find the first index that contains a Potion, SuperPotion, or Revive
+            // Find first available healing item
             var itemIndex = -1
             val inventory = player.inventory.getContents()
 
@@ -64,10 +77,16 @@ class MainActivity : AppCompatActivity() {
                     break
                 }
             }
-
             if (itemIndex != -1) {
                 val result = battle.playerUseItem(itemIndex)
-                updateUI(result.log, result.playerCurrentHp, result.enemyCurrentHp)
+                updateUI(
+                    result.log,
+                    result.playerCurrentHp,
+                    result.enemyCurrentHp,
+                    result.playerExp,
+                    result.playerMaxExp,
+                    result.playerLevel
+                )
                 checkBattleEnd(result.status)
             } else {
                 Toast.makeText(this, "No healing items left!", Toast.LENGTH_SHORT).show()
@@ -77,48 +96,63 @@ class MainActivity : AppCompatActivity() {
         btnRun.setOnClickListener {
             val battle = currentBattle ?: return@setOnClickListener
             val result = battle.playerRun()
-            updateUI(result.log, result.playerCurrentHp, result.enemyCurrentHp)
-            checkBattleEnd(result.status)
-        }
+            updateUI(
+                result.log,
+                result.playerCurrentHp,
+                result.enemyCurrentHp,
+                result.playerExp,
+                result.playerMaxExp,
+                result.playerLevel
+            )
+            checkBattleEnd(result.status)        }
     }
 
     private fun startWildEncounter() {
         val player = GameRepository.player ?: return
-        // Auto-switch to first healthy pokemon
         val activePokemon = player.getActivePokemon()
 
         if (activePokemon == null) {
-            appendLog("All your Pokemon have fainted! You blacked out.")
-            // In a real game, you'd heal them here or reset the game
+            appendLog("\nAll your Pokemon have fainted! You blacked out.")
             player.party.forEach { it.heal(it.maxHP) }
             appendLog("Nurse Joy healed your party.")
-            startWildEncounter() // Try again
+            startWildEncounter()
             return
         }
 
-        val wildPokemon = createPokemon("TORCHIC") ?: return
-        wildPokemon.setLevel(5)
+        val wildPokemon = createRandomWildPokemon()
+        // Scale enemy level
+        wildPokemon.setLevel(activePokemon.level.coerceAtLeast(1))
 
         currentBattle = BattleManager(player, activePokemon, wildPokemon)
 
         appendLog("\n--- NEW BATTLE ---")
         appendLog("A wild ${wildPokemon.name} appeared!")
-        updateStatus(activePokemon.currentHP, wildPokemon.currentHP)
-    }
 
-    private fun updateUI(log: String, playerHp: Int, enemyHp: Int) {
+        // --- UPDATED CALL ---
+        updateStatus(
+            activePokemon.currentHP,
+            wildPokemon.currentHP,
+            activePokemon.exp,
+            activePokemon.expToLevelUp,
+            activePokemon.level
+        )
+    }
+    private fun updateUI(log: String, playerHp: Int, enemyHp: Int, exp: Int, maxExp: Int, level: Int) {
         appendLog(log)
-        updateStatus(playerHp, enemyHp)
+        updateStatus(playerHp, enemyHp, exp, maxExp, level)
     }
-
-    private fun updateStatus(playerHp: Int, enemyHp: Int) {
-        txtPlayerStatus.text = "Player HP: $playerHp | Enemy HP: $enemyHp"
+    private fun updateStatus(playerHp: Int, enemyHp: Int, exp: Int, maxExp: Int, level: Int) {
+        val statusText = """
+            Player: Lvl $level ($playerHp HP)
+            EXP: $exp / $maxExp
+            -----------------------
+            Enemy: $enemyHp HP
+        """.trimIndent()
+        txtPlayerStatus.text = statusText
     }
-
     private fun appendLog(text: String) {
         val currentText = txtGameLog.text.toString()
         txtGameLog.text = "$currentText\n$text"
-        // Optional: Scroll to bottom logic would go here
     }
 
     private fun checkBattleEnd(status: BattleStatus) {
@@ -126,13 +160,12 @@ class MainActivity : AppCompatActivity() {
             BattleStatus.WIN -> {
                 appendLog("Victory!")
                 Toast.makeText(this, "You Won!", Toast.LENGTH_SHORT).show()
-                // FIX: Start a new battle after a short delay or immediately
+                // Start next battle automatically
                 startWildEncounter()
             }
             BattleStatus.LOSE -> {
                 appendLog("Defeat...")
                 Toast.makeText(this, "You Lost...", Toast.LENGTH_SHORT).show()
-                // Logic to heal or restart
                 startWildEncounter()
             }
             BattleStatus.CAUGHT -> {

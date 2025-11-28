@@ -8,7 +8,6 @@ import com.example.myapplication.models.Potion
 import com.example.myapplication.models.Pokeball
 import kotlin.random.Random
 
-// Enum to track the state of the battle
 enum class BattleStatus {
     ONGOING,
     WIN,
@@ -17,23 +16,24 @@ enum class BattleStatus {
     RAN
 }
 
-// A data packet sent back to the UI after every turn
+// 1. Update Data Class to include EXP and Level info
 data class TurnResult(
     val log: String,
     val status: BattleStatus,
     val enemyCurrentHp: Int,
-    val playerCurrentHp: Int
+    val playerCurrentHp: Int,
+    val playerExp: Int,
+    val playerMaxExp: Int,
+    val playerLevel: Int
 )
 
 class BattleManager(
     private val player: Player,
-    val playerPokemon: Pokemon, // Public so UI can read maxHP/Name
+    val playerPokemon: Pokemon,
     val wildPokemon: Pokemon
 ) {
 
     private val playerInventory: Inventory = player.inventory
-
-    // --- PLAYER ACTIONS ---
 
     fun playerFight(moveIndex: Int): TurnResult {
         val move = playerPokemon.moves.getOrNull(moveIndex)
@@ -44,13 +44,19 @@ class BattleManager(
         // 1. Player Attacks
         sb.append(performAttack(playerPokemon, wildPokemon, move))
 
-        // 2. Check if Enemy Fainted
+        // 2. Check if Enemy Fainted (WIN CONDITION)
         if (wildPokemon.isFainted()) {
             sb.append("\nThe wild ${wildPokemon.name} fainted. You win!")
+
+            // --- NEW: Handle EXP Gain ---
+            val expReward = wildPokemon.level * 5 // Simple formula
+            val levelLog = playerPokemon.expGain(expReward)
+            sb.append("\n$levelLog")
+
             return createResult(sb.toString(), BattleStatus.WIN)
         }
 
-        // 3. Enemy Turn (if still alive)
+        // 3. Enemy Turn
         sb.append("\n").append(aiTurn())
 
         // 4. Check if Player Fainted
@@ -68,28 +74,19 @@ class BattleManager(
 
         val sb = StringBuilder()
 
-        // 1. Use Item
         val useMessage = when (item) {
             is Potion -> item.use(playerPokemon, playerInventory, itemIndex)
-            // Note: We pass 0 as a dummy index for Pokeball because it consumes itself in logic,
-            // but your original logic passed itemIndex. Ensure Item.kt handles removal correctly.
             is Pokeball -> item.use(wildPokemon, playerInventory, itemIndex)
             else -> "You can't use that here!"
         }
         sb.append(useMessage)
 
-        // 2. Check Catch Success
         if (useMessage.contains("Gotcha!")) {
             player.addPokemon(wildPokemon)
             return createResult(sb.toString(), BattleStatus.CAUGHT)
         }
 
-        // 3. If it was a healing item, the turn continues -> Enemy Attacks
-        // (Unless the item logic failed, e.g., "Already full HP")
         if (!useMessage.contains("broke free") && !useMessage.contains("healed")) {
-            // If item failed (e.g. "Can't use"), don't trigger enemy turn?
-            // Design choice: usually wasting a turn means getting hit.
-            // For now, we only trigger enemy turn if item was actually used.
             return createResult(sb.toString(), BattleStatus.ONGOING)
         }
 
@@ -107,15 +104,12 @@ class BattleManager(
         return createResult("You got away safely!", BattleStatus.RAN)
     }
 
-    // --- INTERNAL LOGIC ---
-
     private fun aiTurn(): String {
         val aiMove = wildPokemon.moves.random()
         return performAttack(wildPokemon, playerPokemon, aiMove)
     }
 
     private fun performAttack(attacker: Pokemon, target: Pokemon, move: Move): String {
-        // Math logic from your original Battle.kt
         val levelFactor = (2.0 * attacker.level / 5.0) + 2.0
         val effectiveAtk = attacker.currentAtk.toDouble() / (10 + attacker.level)
         val baseDamage = (levelFactor * move.basePower * effectiveAtk) / 10.0
@@ -134,12 +128,16 @@ class BattleManager(
         return log.toString()
     }
 
+    // 3. Update helper to populate new fields
     private fun createResult(message: String, status: BattleStatus): TurnResult {
         return TurnResult(
             log = message,
             status = status,
             enemyCurrentHp = wildPokemon.currentHP,
-            playerCurrentHp = playerPokemon.currentHP
+            playerCurrentHp = playerPokemon.currentHP,
+            playerExp = playerPokemon.exp,
+            playerMaxExp = playerPokemon.expToLevelUp,
+            playerLevel = playerPokemon.level
         )
     }
 }
