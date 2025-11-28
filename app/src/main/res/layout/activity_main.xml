@@ -8,76 +8,76 @@
     android:background="#F0F0F0"
     tools:context=".logic.MainActivity">
 
-    <LinearLayout
-        android:id="@+id/layoutSetup"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:orientation="vertical"
-        android:gravity="center"
-        android:visibility="visible">
+<!--    <LinearLayout-->
+<!--        android:id="@+id/layoutSetup"-->
+<!--        android:layout_width="match_parent"-->
+<!--        android:layout_height="match_parent"-->
+<!--        android:orientation="vertical"-->
+<!--        android:gravity="center"-->
+<!--        android:visibility="visible">-->
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Welcome to PokeTextRPG!"
-            android:textSize="24sp"
-            android:textStyle="bold"
-            android:layout_marginBottom="24dp"/>
+<!--        <TextView-->
+<!--            android:layout_width="wrap_content"-->
+<!--            android:layout_height="wrap_content"-->
+<!--            android:text="Welcome to PokeTextRPG!"-->
+<!--            android:textSize="24sp"-->
+<!--            android:textStyle="bold"-->
+<!--            android:layout_marginBottom="24dp"/>-->
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Enter your Name:"
-            android:textSize="16sp"/>
+<!--        <TextView-->
+<!--            android:layout_width="wrap_content"-->
+<!--            android:layout_height="wrap_content"-->
+<!--            android:text="Enter your Name:"-->
+<!--            android:textSize="16sp"/>-->
 
-        <EditText
-            android:id="@+id/etPlayerName"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:hint="Player Name"
-            android:inputType="textPersonName"
-            android:layout_marginBottom="24dp"/>
+<!--        <EditText-->
+<!--            android:id="@+id/etPlayerName"-->
+<!--            android:layout_width="match_parent"-->
+<!--            android:layout_height="wrap_content"-->
+<!--            android:hint="Player Name"-->
+<!--            android:inputType="textPersonName"-->
+<!--            android:layout_marginBottom="24dp"/>-->
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Choose your Starter:"
-            android:textSize="16sp"
-            android:layout_marginBottom="8dp"/>
+<!--        <TextView-->
+<!--            android:layout_width="wrap_content"-->
+<!--            android:layout_height="wrap_content"-->
+<!--            android:text="Choose your Starter:"-->
+<!--            android:textSize="16sp"-->
+<!--            android:layout_marginBottom="8dp"/>-->
 
-        <RadioGroup
-            android:id="@+id/rgStarter"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:gravity="center_horizontal"
-            android:layout_marginBottom="24dp">
+<!--        <RadioGroup-->
+<!--            android:id="@+id/rgStarter"-->
+<!--            android:layout_width="match_parent"-->
+<!--            android:layout_height="wrap_content"-->
+<!--            android:gravity="center_horizontal"-->
+<!--            android:layout_marginBottom="24dp">-->
 
-            <RadioButton
-                android:id="@+id/rbTreecko"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Treecko (Grass)"
-                android:checked="true"/>
-            <RadioButton
-                android:id="@+id/rbTorchic"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Torchic (Fire)"/>
-            <RadioButton
-                android:id="@+id/rbMudkip"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Mudkip (Water)"/>
-        </RadioGroup>
+<!--            <RadioButton-->
+<!--                android:id="@+id/rbTreecko"-->
+<!--                android:layout_width="wrap_content"-->
+<!--                android:layout_height="wrap_content"-->
+<!--                android:text="Treecko (Grass)"-->
+<!--                android:checked="true"/>-->
+<!--            <RadioButton-->
+<!--                android:id="@+id/rbTorchic"-->
+<!--                android:layout_width="wrap_content"-->
+<!--                android:layout_height="wrap_content"-->
+<!--                android:text="Torchic (Fire)"/>-->
+<!--            <RadioButton-->
+<!--                android:id="@+id/rbMudkip"-->
+<!--                android:layout_width="wrap_content"-->
+<!--                android:layout_height="wrap_content"-->
+<!--                android:text="Mudkip (Water)"/>-->
+<!--        </RadioGroup>-->
 
-        <Button
-            android:id="@+id/btnStartGame"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Start Adventure"
-            android:backgroundTint="#6200EE"
-            android:textColor="#FFFFFF"/>
-    </LinearLayout>
+<!--        <Button-->
+<!--            android:id="@+id/btnStartGame"-->
+<!--            android:layout_width="match_parent"-->
+<!--            android:layout_height="wrap_content"-->
+<!--            android:text="Start Adventure"-->
+<!--            android:backgroundTint="#6200EE"-->
+<!--            android:textColor="#FFFFFF"/>-->
+<!--    </LinearLayout>-->
 
     <LinearLayout
         android:id="@+id/layoutGame"

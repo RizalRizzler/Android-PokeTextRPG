@@ -1,33 +1,18 @@
 package com.example.myapplication.logic
 
+import android.content.Intent
 import android.os.Bundle
-import android.view.View
 import android.widget.Button
-import android.widget.EditText
-import android.widget.LinearLayout
-import android.widget.RadioButton
-import android.widget.RadioGroup
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.example.myapplication.R
 import com.example.myapplication.models.Potion
 import com.example.myapplication.models.SuperPotion
-import com.example.myapplication.models.createPokemon
 import com.example.myapplication.models.createRandomWildPokemon
 
 class MainActivity : AppCompatActivity() {
 
-    // Game UI Elements
-    private lateinit var layoutSetup: LinearLayout
-    private lateinit var layoutGame: LinearLayout
-
-    // Setup UI Elements
-    private lateinit var etPlayerName: EditText
-    private lateinit var rgStarter: RadioGroup
-    private lateinit var btnStartGame: Button
-
-    // Battle UI Elements
     private lateinit var txtGameLog: TextView
     private lateinit var txtPlayerStatus: TextView
     private lateinit var btnAttack: Button
@@ -40,13 +25,12 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        // Initialize Views
-        layoutSetup = findViewById(R.id.layoutSetup)
-        layoutGame = findViewById(R.id.layoutGame)
-
-        etPlayerName = findViewById(R.id.etPlayerName)
-        rgStarter = findViewById(R.id.rgStarter)
-        btnStartGame = findViewById(R.id.btnStartGame)
+        // Safety Check: If player is null (app crashed/restarted in background), go back to Setup
+        if (GameRepository.player == null) {
+            startActivity(Intent(this, SetupActivity::class.java))
+            finish()
+            return
+        }
 
         txtGameLog = findViewById(R.id.txtGameLog)
         txtPlayerStatus = findViewById(R.id.txtPlayerStatus)
@@ -54,47 +38,19 @@ class MainActivity : AppCompatActivity() {
         btnHeal = findViewById(R.id.btnHeal)
         btnRun = findViewById(R.id.btnRun)
 
-        // Check if game is already running (e.g. after rotation), otherwise show setup
-        if (GameRepository.player == null) {
-            showSetupScreen()
-        } else {
-            showGameScreen()
-        }
+        // Log welcome message
+        val playerName = GameRepository.player?.name ?: "Trainer"
+        val starterName = GameRepository.player?.party?.firstOrNull()?.name ?: "Pokemon"
+        appendLog("Welcome, $playerName! Go get 'em, $starterName!")
 
-        // --- Setup Logic ---
-        btnStartGame.setOnClickListener {
-            val nameInput = etPlayerName.text.toString()
-            if (nameInput.isBlank()) {
-                etPlayerName.error = "Please enter a name!"
-                return@setOnClickListener
-            }
+        // Start the first random battle
+        startWildEncounter()
 
-            // Determine Starter based on Radio Button
-            val selectedStarterName = when (rgStarter.checkedRadioButtonId) {
-                R.id.rbTreecko -> "TREECKO"
-                R.id.rbTorchic -> "TORCHIC"
-                R.id.rbMudkip -> "MUDKIP"
-                else -> "TREECKO" // Default
-            }
-
-            // Initialize Game
-            GameRepository.initializeGame(nameInput)
-            val starterPokemon = createPokemon(selectedStarterName)
-
-            if (starterPokemon != null) {
-                GameRepository.player?.addPokemon(starterPokemon)
-                showGameScreen()
-                appendLog("Welcome, $nameInput! You chose ${starterPokemon.name}!")
-                startWildEncounter()
-            } else {
-                Toast.makeText(this, "Error creating starter.", Toast.LENGTH_SHORT).show()
-            }
-        }
-
-        // --- Battle Logic ---
+        // --- BUTTON LISTENERS ---
         btnAttack.setOnClickListener {
             val battle = currentBattle ?: return@setOnClickListener
-            val result = battle.playerFight(0) // Uses first move
+            // Use move 0 (Tackle/Scratch usually)
+            val result = battle.playerFight(0)
             updateUI(result.log, result.playerCurrentHp, result.enemyCurrentHp)
             checkBattleEnd(result.status)
         }
@@ -103,7 +59,7 @@ class MainActivity : AppCompatActivity() {
             val battle = currentBattle ?: return@setOnClickListener
             val player = GameRepository.player ?: return@setOnClickListener
 
-            // Find healing item
+            // Find first available healing item
             var itemIndex = -1
             val inventory = player.inventory.getContents()
 
@@ -132,36 +88,26 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun showSetupScreen() {
-        layoutSetup.visibility = View.VISIBLE
-        layoutGame.visibility = View.GONE
-    }
-
-    private fun showGameScreen() {
-        layoutSetup.visibility = View.GONE
-        layoutGame.visibility = View.VISIBLE
-    }
-
     private fun startWildEncounter() {
         val player = GameRepository.player ?: return
         val activePokemon = player.getActivePokemon()
 
         if (activePokemon == null) {
             appendLog("\nAll your Pokemon have fainted! You blacked out.")
-            // Logic to heal party (Simulating Center)
+            // Heal party and restart battle
             player.party.forEach { it.heal(it.maxHP) }
-            appendLog("Nurse Joy healed your party. Be careful next time!")
-            // Try again
+            appendLog("Nurse Joy healed your party.")
             startWildEncounter()
             return
         }
 
-        // --- RANDOMIZED ENCOUNTER CHANGE ---
-        // Instead of hardcoding "TORCHIC", we use the helper from Pokemon.kt
+        // --- RANDOMIZED ENCOUNTER ---
+        // Using the helper function from Pokemon.kt
         val wildPokemon = createRandomWildPokemon()
 
-        // Scale enemy level to player level roughly (optional, but good for balance)
-        wildPokemon.setLevel(activePokemon.level.coerceAtLeast(1))
+        // Optional: Scale wild pokemon to be near player level
+        val scaledLevel = (activePokemon.level - 1).coerceAtLeast(1)
+        wildPokemon.setLevel(scaledLevel)
 
         currentBattle = BattleManager(player, activePokemon, wildPokemon)
 
@@ -182,8 +128,6 @@ class MainActivity : AppCompatActivity() {
     private fun appendLog(text: String) {
         val currentText = txtGameLog.text.toString()
         txtGameLog.text = "$currentText\n$text"
-
-        // Auto-scroll logic could be added here
     }
 
     private fun checkBattleEnd(status: BattleStatus) {
@@ -191,6 +135,7 @@ class MainActivity : AppCompatActivity() {
             BattleStatus.WIN -> {
                 appendLog("Victory!")
                 Toast.makeText(this, "You Won!", Toast.LENGTH_SHORT).show()
+                // Start next battle automatically
                 startWildEncounter()
             }
             BattleStatus.LOSE -> {

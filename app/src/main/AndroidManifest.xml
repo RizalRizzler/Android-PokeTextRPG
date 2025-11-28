@@ -10,19 +10,18 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.AppCompat.Light.DarkActionBar">
 
-        <!--
-           NOTICE THE CHANGE BELOW:
-           We added ".logic" before .MainActivity because that is
-           the folder where you moved the file.
-        -->
         <activity
-            android:name=".logic.MainActivity"
+            android:name=".logic.SetupActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <activity
+            android:name=".logic.MainActivity"
+            android:exported="false" />
 
     </application>
 
