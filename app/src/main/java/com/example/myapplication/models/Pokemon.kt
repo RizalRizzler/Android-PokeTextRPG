@@ -9,7 +9,7 @@ class Pokemon(val species: pokemonSpecies){
     val currentHP: Int
         get() = _currentHp
 
-    //level awal pokemon (5 karena biasanya starter lv 5)
+    //starter lv set to 5
     var level: Int = 5
         private set
 
@@ -27,7 +27,6 @@ class Pokemon(val species: pokemonSpecies){
     }
     fun takeDamage(damage: Int){
         _currentHp -= damage
-        //supaya current hp tidak negatif
         if (_currentHp < 0){
             _currentHp = 0
         }
@@ -35,18 +34,13 @@ class Pokemon(val species: pokemonSpecies){
 
     fun heal(amount: Int){
         _currentHp += amount
-        //supaya current hp tidak melebihi maxHP
         if (_currentHp >maxHP){
             _currentHp = maxHP
         }
     }
 
     fun isFainted(): Boolean = _currentHp <= 0
-
-    /**
-     * Adds Exp and handles leveling up.
-     * Returns a String log of what happened for the UI to display.
-     */
+    //println to string builder
     fun expGain(amount: Int): String {
         exp += amount
         val logBuilder = StringBuilder("$name gained $amount EXP.")
@@ -60,7 +54,7 @@ class Pokemon(val species: pokemonSpecies){
     }
 
     fun levelUp(): String{
-        exp -= expToLevelUp //current exp dikurangi cap exp lalu level up
+        exp -= expToLevelUp
         level++
     
         

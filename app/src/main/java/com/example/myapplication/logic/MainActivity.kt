@@ -25,7 +25,7 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        // Safety Check: If player is null (app crashed/restarted in background), go back to Setup
+        //if player is null (app crashed/restarted in background), go back to setup act
         if (GameRepository.player == null) {
             startActivity(Intent(this, SetupActivity::class.java))
             finish()
@@ -38,18 +38,16 @@ class MainActivity : AppCompatActivity() {
         btnHeal = findViewById(R.id.btnHeal)
         btnRun = findViewById(R.id.btnRun)
 
-        // Log welcome message
         val playerName = GameRepository.player?.name ?: "Trainer"
         val starterName = GameRepository.player?.party?.firstOrNull()?.name ?: "Pokemon"
         appendLog("Welcome, $playerName! Go get 'em, $starterName!")
 
-        // Start the first random battle
         startWildEncounter()
 
-        // --- BUTTON LISTENERS ---
+        //button listener
         btnAttack.setOnClickListener {
             val battle = currentBattle ?: return@setOnClickListener
-            // Use move 0 (Tackle/Scratch usually)
+            //placeholder
             val result = battle.playerFight(0)
             updateUI(
                 result.log,
@@ -120,15 +118,16 @@ class MainActivity : AppCompatActivity() {
         }
 
         val wildPokemon = createRandomWildPokemon()
-        // Scale enemy level
-        wildPokemon.setLevel(activePokemon.level.coerceAtLeast(1))
+        //enemy level
+        val randomLevel = (activePokemon.level - 2..activePokemon.level + 1).random().coerceAtLeast(3)
+        wildPokemon.setLevel(randomLevel)
 
         currentBattle = BattleManager(player, activePokemon, wildPokemon)
 
         appendLog("\n--- NEW BATTLE ---")
         appendLog("A wild ${wildPokemon.name} appeared!")
 
-        // --- UPDATED CALL ---
+        //update status bar
         updateStatus(
             activePokemon.currentHP,
             wildPokemon.currentHP,
@@ -160,7 +159,6 @@ class MainActivity : AppCompatActivity() {
             BattleStatus.WIN -> {
                 appendLog("Victory!")
                 Toast.makeText(this, "You Won!", Toast.LENGTH_SHORT).show()
-                // Start next battle automatically
                 startWildEncounter()
             }
             BattleStatus.LOSE -> {

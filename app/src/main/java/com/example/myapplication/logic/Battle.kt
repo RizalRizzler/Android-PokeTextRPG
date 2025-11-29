@@ -16,7 +16,6 @@ enum class BattleStatus {
     RAN
 }
 
-// 1. Update Data Class to include EXP and Level info
 data class TurnResult(
     val log: String,
     val status: BattleStatus,
@@ -41,25 +40,21 @@ class BattleManager(
 
         val sb = StringBuilder()
 
-        // 1. Player Attacks
         sb.append(performAttack(playerPokemon, wildPokemon, move))
 
-        // 2. Check if Enemy Fainted (WIN CONDITION)
         if (wildPokemon.isFainted()) {
             sb.append("\nThe wild ${wildPokemon.name} fainted. You win!")
 
-            // --- NEW: Handle EXP Gain ---
-            val expReward = wildPokemon.level * 5 // Simple formula
+
+            val expReward = wildPokemon.level * 5
             val levelLog = playerPokemon.expGain(expReward)
             sb.append("\n$levelLog")
 
             return createResult(sb.toString(), BattleStatus.WIN)
         }
 
-        // 3. Enemy Turn
         sb.append("\n").append(aiTurn())
 
-        // 4. Check if Player Fainted
         if (playerPokemon.isFainted()) {
             sb.append("\n${playerPokemon.name} fainted... You blacked out.")
             return createResult(sb.toString(), BattleStatus.LOSE)
@@ -128,7 +123,6 @@ class BattleManager(
         return log.toString()
     }
 
-    // 3. Update helper to populate new fields
     private fun createResult(message: String, status: BattleStatus): TurnResult {
         return TurnResult(
             log = message,
