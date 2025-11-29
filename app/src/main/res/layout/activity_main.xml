@@ -27,6 +27,7 @@
         </androidx.cardview.widget.CardView>
 
         <ScrollView
+            android:id="@+id/scrollGameLog"
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:layout_weight="1"
@@ -46,6 +47,7 @@
         </ScrollView>
 
         <LinearLayout
+            style="?android:attr/buttonBarStyle"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
@@ -54,31 +56,34 @@
 
             <Button
                 android:id="@+id/btnAttack"
+                style="?android:attr/buttonBarButtonStyle"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:text="Attack"
                 android:layout_marginEnd="4dp"
-                android:backgroundTint="#E53935"
-                android:textColor="#FFFFFF"/>
+                android:backgroundTint="#750E0A"
+                android:textColor="#FFFFFF" />
 
             <Button
                 android:id="@+id/btnHeal"
+                style="?android:attr/buttonBarButtonStyle"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_marginEnd="4dp"
                 android:layout_weight="1"
-                android:backgroundTint="#43A047"
+                android:backgroundTint="#238348"
                 android:text="Heal"
                 android:textColor="#FFFFFF" />
 
             <Button
                 android:id="@+id/btnRun"
+                style="?android:attr/buttonBarButtonStyle"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:text="Run"
-                android:backgroundTint="#FB8C00"
+                android:backgroundTint="#454242"
                 android:textColor="#FFFFFF"/>
         </LinearLayout>
 </LinearLayout>

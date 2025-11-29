@@ -2,55 +2,51 @@ package com.example.myapplication.logic
 
 import android.content.Intent
 import android.os.Bundle
+import android.view.View
 import android.widget.Button
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.example.myapplication.R
+import com.example.myapplication.databinding.ActivityMainBinding
 import com.example.myapplication.models.Potion
 import com.example.myapplication.models.SuperPotion
 import com.example.myapplication.models.createRandomWildPokemon
 
+
 class MainActivity : AppCompatActivity() {
 
-    private lateinit var txtGameLog: TextView
-    private lateinit var txtPlayerStatus: TextView
-    private lateinit var btnAttack: Button
-    private lateinit var btnHeal: Button
-    private lateinit var btnRun: Button
-
+    private lateinit var binding: ActivityMainBinding
     private var currentBattle: BattleManager? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
-
-        // Safety Check: If player is null (app crashed/restarted in background), go back to Setup
+        binding = ActivityMainBinding.inflate(layoutInflater)
+        setContentView(binding.root)
+        //if player is null (app crashed/restarted in background), go back to setup act
         if (GameRepository.player == null) {
             startActivity(Intent(this, SetupActivity::class.java))
             finish()
             return
         }
 
-        txtGameLog = findViewById(R.id.txtGameLog)
-        txtPlayerStatus = findViewById(R.id.txtPlayerStatus)
-        btnAttack = findViewById(R.id.btnAttack)
-        btnHeal = findViewById(R.id.btnHeal)
-        btnRun = findViewById(R.id.btnRun)
+//        txtGameLog = findViewById(R.id.txtGameLog)
+//        txtPlayerStatus = findViewById(R.id.txtPlayerStatus)
+//        btnAttack = findViewById(R.id.btnAttack)
+//        btnHeal = findViewById(R.id.btnHeal)
+//        btnRun = findViewById(R.id.btnRun)
 
-        // Log welcome message
         val playerName = GameRepository.player?.name ?: "Trainer"
         val starterName = GameRepository.player?.party?.firstOrNull()?.name ?: "Pokemon"
         appendLog("Welcome, $playerName! Go get 'em, $starterName!")
 
-        // Start the first random battle
         startWildEncounter()
 
-        // --- BUTTON LISTENERS ---
-        btnAttack.setOnClickListener {
+        //button listener
+        binding.btnAttack.setOnClickListener {
             val battle = currentBattle ?: return@setOnClickListener
-            // Use move 0 (Tackle/Scratch usually)
-            val result = battle.playerFight(0)
+            //placeholder
+            val result = battle.playerFight(1)
             updateUI(
                 result.log,
                 result.playerCurrentHp,
@@ -62,11 +58,10 @@ class MainActivity : AppCompatActivity() {
             checkBattleEnd(result.status)
         }
 
-        btnHeal.setOnClickListener {
+        binding.btnHeal.setOnClickListener {
             val battle = currentBattle ?: return@setOnClickListener
             val player = GameRepository.player ?: return@setOnClickListener
 
-            // Find first available healing item
             var itemIndex = -1
             val inventory = player.inventory.getContents()
 
@@ -93,7 +88,7 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
-        btnRun.setOnClickListener {
+        binding.btnRun.setOnClickListener {
             val battle = currentBattle ?: return@setOnClickListener
             val result = battle.playerRun()
             updateUI(
@@ -120,15 +115,16 @@ class MainActivity : AppCompatActivity() {
         }
 
         val wildPokemon = createRandomWildPokemon()
-        // Scale enemy level
-        wildPokemon.setLevel(activePokemon.level.coerceAtLeast(1))
+        //enemy level
+        val randomLevel = (activePokemon.level - 2..activePokemon.level + 1).random().coerceAtLeast(3)
+        wildPokemon.setLevel(randomLevel)
 
         currentBattle = BattleManager(player, activePokemon, wildPokemon)
 
         appendLog("\n--- NEW BATTLE ---")
         appendLog("A wild ${wildPokemon.name} appeared!")
 
-        // --- UPDATED CALL ---
+        //update status bar
         updateStatus(
             activePokemon.currentHP,
             wildPokemon.currentHP,
@@ -146,13 +142,19 @@ class MainActivity : AppCompatActivity() {
             Player: Lvl $level ($playerHp HP)
             EXP: $exp / $maxExp
             -----------------------
-            Enemy: $enemyHp HP
+            Foe's Pokemon: ${currentBattle?.wildPokemon?.name} Lv. ${currentBattle?.wildPokemon?.level} 
+            Foe's HP: $enemyHp HP
+            
         """.trimIndent()
-        txtPlayerStatus.text = statusText
+        binding.txtPlayerStatus.text = statusText
     }
     private fun appendLog(text: String) {
-        val currentText = txtGameLog.text.toString()
-        txtGameLog.text = "$currentText\n$text"
+//        val currentText = binding.txtGameLog.text.toString()
+//        binding.txtGameLog.text = "$currentText\n$text"
+        binding.txtGameLog.append("\n$text")
+        binding.scrollGameLog.post {
+            binding.scrollGameLog.fullScroll(View.FOCUS_DOWN)
+        }
     }
 
     private fun checkBattleEnd(status: BattleStatus) {
@@ -160,7 +162,6 @@ class MainActivity : AppCompatActivity() {
             BattleStatus.WIN -> {
                 appendLog("Victory!")
                 Toast.makeText(this, "You Won!", Toast.LENGTH_SHORT).show()
-                // Start next battle automatically
                 startWildEncounter()
             }
             BattleStatus.LOSE -> {

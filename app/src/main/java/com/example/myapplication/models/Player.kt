@@ -20,7 +20,6 @@ class Player(val name: String){
     }
 
     fun getActivePokemon(): Pokemon?{
-        //cari pokemon yang ngga tewas
         return party.firstOrNull { !it.isFainted() }
     }
 

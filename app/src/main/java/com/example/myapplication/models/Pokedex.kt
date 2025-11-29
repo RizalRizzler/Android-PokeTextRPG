@@ -29,6 +29,7 @@ object Pokedex{
     private val MAGIKARP = pokemonSpecies("Magikarp",18,8,listOf(tackle))
     private val MAGICKARP = pokemonSpecies("'Magic'Karp",18,12,listOf(tackle,Obliteration,splash,splash))
     private val MILTANK = pokemonSpecies("Miltank",46,9,listOf(rollout))    //make map buat list pokemon, key nya string value nya variable pokemon yang udah diisi
+
     val database: Map<String, pokemonSpecies> = mapOf(
         "TREECKO" to TREECKO,
         "PIKACHU" to PIKACHU,
