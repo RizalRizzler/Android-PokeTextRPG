@@ -1,5 +1,6 @@
 package com.example.myapplication.logic
 
+import android.util.Log
 import com.example.myapplication.models.Inventory
 import com.example.myapplication.models.Move
 import com.example.myapplication.models.Player
@@ -114,6 +115,7 @@ class BattleManager(
         val randMod = 0.85 + (Random.nextDouble() * 0.15)
 
         val finalDamage = maxOf(1, (baseDamage * critMod * randMod).toInt())
+        Log.d("BattleLogic", "${attacker.name} used ${move.name}. Base: $baseDamage, Final: $finalDamage")
         target.takeDamage(finalDamage)
 
         val log = StringBuilder("${attacker.name} used ${move.name}!\n")
