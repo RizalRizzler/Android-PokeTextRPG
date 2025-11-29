@@ -18,7 +18,6 @@ class MainActivity : AppCompatActivity() {
     private lateinit var btnAttack: Button
     private lateinit var btnHeal: Button
     private lateinit var btnRun: Button
-
     private var currentBattle: BattleManager? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
