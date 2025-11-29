@@ -1,13 +1,13 @@
 package com.example.myapplication.logic
 
+//import android.widget.Button
+//import android.widget.TextView
+//import com.example.myapplication.R
 import android.content.Intent
 import android.os.Bundle
 import android.view.View
-import android.widget.Button
-import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import com.example.myapplication.R
 import com.example.myapplication.databinding.ActivityMainBinding
 import com.example.myapplication.models.Potion
 import com.example.myapplication.models.SuperPotion
@@ -117,7 +117,7 @@ class MainActivity : AppCompatActivity() {
         val wildPokemon = createRandomWildPokemon()
         //enemy level
         val randomLevel = (activePokemon.level - 2..activePokemon.level + 1).random().coerceAtLeast(3)
-        wildPokemon.setLevel(randomLevel)
+        wildPokemon.initLevel(randomLevel)
 
         currentBattle = BattleManager(player, activePokemon, wildPokemon)
 

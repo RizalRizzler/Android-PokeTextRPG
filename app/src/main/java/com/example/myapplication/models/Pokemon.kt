@@ -66,7 +66,7 @@ class Pokemon(
         return "$name grew to Level $level! (HP: $maxHP, Atk: $currentAtk)"
     }
 
-    fun setLevel(newLvl: Int){
+    fun initLevel(newLvl: Int){
         level = newLvl.coerceAtLeast(1)
         exp = 0
         _currentHp = maxHP
